@@ -1,2 +1,2 @@
 # tentokai
-/C:/Users/mikit/OneDrive/ドキュメント/指令/tenuto-github-pages-upload.zip
+キッチン取り付け施工管理　天兎会
