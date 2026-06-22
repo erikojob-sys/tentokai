@@ -1,0 +1,1173 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>キッチン施工管理</title>
+  <style>
+    :root {
+      --ink: #182333;
+      --muted: #647184;
+      --line: #d9e0e8;
+      --soft: #f5f8fb;
+      --navy: #17365d;
+      --green: #1f7a4c;
+      --green-soft: #e8f4ee;
+      --red: #b83b32;
+      --red-soft: #faecea;
+      --amber: #956200;
+      --amber-soft: #fff4db;
+      --white: #ffffff;
+      --shadow: 0 10px 30px rgba(24, 35, 51, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--soft);
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    .app {
+      width: min(100%, 440px);
+      min-height: 100vh;
+      margin: 0 auto;
+      background: var(--white);
+      position: relative;
+      padding-bottom: 76px;
+      box-shadow: var(--shadow);
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: var(--navy);
+      color: var(--white);
+      padding: 14px 16px 12px;
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.2;
+      font-weight: 800;
+    }
+
+    .topbar p {
+      margin: 5px 0 0;
+      color: #dbe7f7;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      padding: 12px 12px 10px;
+      background: var(--white);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .summary div {
+      min-width: 0;
+      padding: 9px 6px;
+      background: var(--soft);
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .summary strong {
+      display: block;
+      font-size: 18px;
+      line-height: 1.1;
+    }
+
+    .summary span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.2;
+    }
+
+    main {
+      padding: 12px 12px 18px;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 4px 0 10px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.2;
+    }
+
+    .section-title small {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .job-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .job-card {
+      width: 100%;
+      text-align: left;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .job-card.selected {
+      border-color: var(--green);
+      background: #fbfffd;
+    }
+
+    .job-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .job-name {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.35;
+      font-weight: 800;
+    }
+
+    .job-meta {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .badge {
+      flex: 0 0 auto;
+      padding: 5px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--navy);
+      background: #e7eef8;
+    }
+
+    .badge.done {
+      color: var(--green);
+      background: var(--green-soft);
+    }
+
+    .badge.bad {
+      color: var(--red);
+      background: var(--red-soft);
+    }
+
+    .checks {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      min-height: 38px;
+      padding: 8px 10px;
+      background: var(--soft);
+      border-radius: 8px;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .check-row input {
+      width: 22px;
+      height: 22px;
+      accent-color: var(--green);
+    }
+
+    .panel {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    .field:first-child {
+      margin-top: 0;
+    }
+
+    .field label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .field input,
+    .field textarea,
+    .field select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--ink);
+      background: var(--white);
+      min-height: 44px;
+    }
+
+    .field textarea {
+      resize: vertical;
+      min-height: 90px;
+      line-height: 1.5;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .segmented button,
+    .reason-grid button,
+    .primary,
+    .secondary {
+      min-height: 44px;
+      border-radius: 8px;
+      font-weight: 800;
+    }
+
+    .segmented button {
+      background: var(--soft);
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    .segmented button.active.good {
+      color: var(--green);
+      background: var(--green-soft);
+      border-color: #8cc5a8;
+    }
+
+    .segmented button.active.bad {
+      color: var(--red);
+      background: var(--red-soft);
+      border-color: #e4a29b;
+    }
+
+    .reason-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .reason-grid button {
+      background: var(--soft);
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    .reason-grid button.active {
+      color: var(--amber);
+      background: var(--amber-soft);
+      border-color: #e7c36c;
+    }
+
+    .primary {
+      width: 100%;
+      color: var(--white);
+      background: var(--green);
+    }
+
+    .secondary {
+      width: 100%;
+      color: var(--navy);
+      background: #e7eef8;
+    }
+
+    .timeline,
+    .messages,
+    .photos,
+    .document-list,
+    .member-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .log-item,
+    .message-item,
+    .document-item,
+    .member-item {
+      padding: 10px;
+      background: var(--soft);
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .log-item strong,
+    .message-item strong,
+    .document-item strong,
+    .member-item strong {
+      display: block;
+      margin-bottom: 3px;
+      font-size: 12px;
+      color: var(--navy);
+    }
+
+    .message-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .message-text {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .message-check {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      min-height: 32px;
+      padding: 5px 8px;
+      border-radius: 8px;
+      background: var(--white);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .message-check input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--green);
+    }
+
+    .document-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .document-item a {
+      min-height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 7px 10px;
+      border-radius: 8px;
+      color: var(--white);
+      background: var(--navy);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .invite-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .invite-actions a,
+    .invite-actions button {
+      min-height: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      border-radius: 8px;
+      text-align: center;
+      color: var(--navy);
+      background: #e7eef8;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .member-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .member-role {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .member-check {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      min-height: 34px;
+      padding: 5px 8px;
+      border-radius: 8px;
+      background: var(--white);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .member-check input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--green);
+    }
+
+    .member-form {
+      display: grid;
+      grid-template-columns: 1fr 0.85fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .member-form .primary {
+      grid-column: 1 / -1;
+    }
+
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .photo-grid img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--soft);
+    }
+
+    .photo-note {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      z-index: 30;
+      width: min(100%, 440px);
+      transform: translateX(-50%);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.96);
+      border-top: 1px solid var(--line);
+      backdrop-filter: blur(12px);
+    }
+
+    .bottom-nav button {
+      min-height: 52px;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .bottom-nav button.active {
+      color: var(--white);
+      background: var(--navy);
+    }
+
+    .empty {
+      padding: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      background: var(--soft);
+      border-radius: 8px;
+    }
+
+    @media (min-width: 720px) {
+      body {
+        background: #e9eef5;
+      }
+
+      .app {
+        margin: 24px auto;
+        min-height: calc(100vh - 48px);
+        border-radius: 18px;
+        overflow: hidden;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <h1>キッチン施工管理</h1>
+      <p>現場の進捗、資料配布、写真、連絡を社員で共有</p>
+    </header>
+
+    <section class="summary" aria-label="本日の集計">
+      <div><strong id="countToday">0</strong><span>本日</span></div>
+      <div><strong id="countDone">0</strong><span>完了</span></div>
+      <div><strong id="countBad">0</strong><span>不良</span></div>
+      <div><strong id="countDocs">0</strong><span>資料未配布</span></div>
+    </section>
+
+    <main>
+      <section id="screen-jobs" class="screen active">
+        <div class="section-title">
+          <h2>本日の案件</h2>
+          <small id="selectedHint">案件を選択</small>
+        </div>
+        <div id="jobList" class="job-list"></div>
+      </section>
+
+      <section id="screen-detail" class="screen">
+        <div class="section-title">
+          <h2>案件詳細</h2>
+          <small id="detailStatus">未選択</small>
+        </div>
+
+        <div class="panel">
+          <div class="field">
+            <label for="jobName">施工案件の名前</label>
+            <input id="jobName" type="text">
+          </div>
+          <div class="field">
+            <label for="crew">担当人員</label>
+            <input id="crew" type="text">
+          </div>
+          <div class="field">
+            <label for="schedule">施工スケジュール</label>
+            <input id="schedule" type="text">
+          </div>
+          <div class="checks">
+            <label class="check-row">資料配布済み <input id="docsChecked" type="checkbox"></label>
+            <label class="check-row">下見資料配布済み <input id="previewChecked" type="checkbox"></label>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="field">
+            <label>施工状況</label>
+            <div class="segmented">
+              <button id="setGood" class="good" type="button">良 → 完了</button>
+              <button id="setBad" class="bad" type="button">不良</button>
+            </div>
+          </div>
+          <div class="field" id="reasonBlock">
+            <label>不良分類</label>
+            <div class="reason-grid">
+              <button id="reasonBase" type="button">下地問題</button>
+              <button id="reasonWork" type="button">施工問題</button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="memo">対応メモ</label>
+            <textarea id="memo" placeholder="例: 壁下地の補強待ち。管理者へ写真共有済み。"></textarea>
+          </div>
+          <button id="saveDetail" class="primary" type="button">案件を保存</button>
+        </div>
+
+        <div class="panel">
+          <div class="section-title">
+            <h2>スケジュール変更</h2>
+          </div>
+          <div class="field">
+            <label for="newSchedule">変更後の予定</label>
+            <input id="newSchedule" type="text" placeholder="例: 6/23 13:00-17:00">
+          </div>
+          <div class="field">
+            <label for="changeReason">変更理由</label>
+            <textarea id="changeReason" placeholder="例: 下地補修後に再訪問"></textarea>
+          </div>
+          <button id="addSchedule" class="secondary" type="button">変更履歴に追加</button>
+        </div>
+      </section>
+
+      <section id="screen-share" class="screen">
+        <div class="section-title">
+          <h2>共有</h2>
+          <small id="shareJobName">未選択</small>
+        </div>
+
+        <div class="panel">
+          <div class="section-title">
+            <h2>メンバー・招待</h2>
+            <small id="memberCount">0人</small>
+          </div>
+          <div class="invite-actions">
+            <a id="lineInvite" href="#" target="_blank" rel="noopener">LINE招待</a>
+            <a id="smsInvite" href="#">メッセージ</a>
+            <button id="copyInvite" type="button">招待文コピー</button>
+          </div>
+          <p class="photo-note" id="inviteStatus">同じアプリURLと案件名を送って、関係者を招待できます。</p>
+          <div id="memberList" class="member-list"></div>
+          <div class="member-form">
+            <input id="memberName" type="text" placeholder="メンバー名">
+            <select id="memberRole">
+              <option value="社員">社員</option>
+              <option value="職人">職人</option>
+              <option value="管理者">管理者</option>
+              <option value="関係者">関係者</option>
+            </select>
+            <button id="addMember" class="primary" type="button">メンバー追加</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="section-title">
+            <h2>メッセージ</h2>
+          </div>
+          <div id="messages" class="messages"></div>
+          <div class="field">
+            <label for="messageText">社内共有メッセージ</label>
+            <textarea id="messageText" placeholder="例: 下地写真を確認してください。"></textarea>
+          </div>
+          <button id="addMessage" class="primary" type="button">共有する</button>
+        </div>
+
+        <div class="panel">
+          <div class="section-title">
+            <h2>PDF資料</h2>
+          </div>
+          <div id="documentList" class="document-list"></div>
+          <p class="photo-note">PDF資料もこの端末のブラウザ内に保存されます。図面、下見資料、施工指示書の共有確認に使えます。</p>
+          <div class="field">
+            <label for="documentInput">PDF資料を追加</label>
+            <input id="documentInput" type="file" accept="application/pdf,.pdf">
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="section-title">
+            <h2>写真</h2>
+          </div>
+          <div class="photo-grid" id="photoGrid"></div>
+          <p class="photo-note">写真はこの端末のブラウザ内に保存されます。社内共有サーバー連携は本番版で追加できます。</p>
+          <div class="field">
+            <label for="photoInput">写真を追加</label>
+            <input id="photoInput" type="file" accept="image/*" capture="environment">
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="section-title">
+            <h2>変更履歴</h2>
+          </div>
+          <div id="timeline" class="timeline"></div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="メイン">
+      <button class="active" data-tab="jobs" type="button">案件</button>
+      <button data-tab="detail" type="button">詳細</button>
+      <button data-tab="share" type="button">共有</button>
+    </nav>
+  </div>
+
+  <script>
+    const storageKey = "kitchen-install-app-v1";
+
+    const defaultJobs = [
+      {
+        id: "k-001",
+        name: "青葉台マンション 1203 キッチン取付",
+        address: "横浜市青葉区",
+        crew: "田中 / 佐藤",
+        schedule: "本日 9:00-12:00",
+        status: "施工中",
+        defectReason: "",
+        docsChecked: true,
+        previewChecked: true,
+        memo: "搬入済み。天板取付前に水平確認。",
+        messages: [
+          { at: "08:15", text: "下見資料と図面は配布済みです。", checked: true }
+        ],
+        photos: ["../senior_room_images/03_kitchen_takara_gracia.png"],
+        documents: [
+          { name: "取付図面サンプル.pdf", size: 248000, data: "" }
+        ],
+        members: [
+          { name: "田中", role: "職人", confirmed: true },
+          { name: "佐藤", role: "職人", confirmed: false },
+          { name: "現場管理", role: "管理者", confirmed: true }
+        ],
+        changes: []
+      },
+      {
+        id: "k-002",
+        name: "南町戸建て システムキッチン交換",
+        address: "川崎市中原区",
+        crew: "鈴木 / 山本 / 李",
+        schedule: "本日 13:00-17:00",
+        status: "予定",
+        defectReason: "",
+        docsChecked: true,
+        previewChecked: false,
+        memo: "午後搬入。下見資料の配布確認が必要。",
+        messages: [],
+        photos: [],
+        documents: [],
+        members: [
+          { name: "鈴木", role: "職人", confirmed: false },
+          { name: "山本", role: "職人", confirmed: false }
+        ],
+        changes: []
+      },
+      {
+        id: "k-003",
+        name: "桜ヶ丘レジデンス 502 下台施工",
+        address: "大和市",
+        crew: "高橋",
+        schedule: "本日 10:30-15:00",
+        status: "不良",
+        defectReason: "下地問題",
+        docsChecked: false,
+        previewChecked: true,
+        memo: "壁下地に不陸あり。補修確認後に再施工。",
+        messages: [
+          { at: "10:48", text: "下地の写真を共有しました。管理者確認待ち。", checked: false }
+        ],
+        photos: ["../senior_room_images/02_ldk.png"],
+        documents: [],
+        members: [
+          { name: "高橋", role: "職人", confirmed: true },
+          { name: "工務店担当", role: "関係者", confirmed: false }
+        ],
+        changes: [
+          { at: "10:55", schedule: "明日 9:00-11:00", reason: "下地補修後に再訪問" }
+        ]
+      }
+    ];
+
+    let jobs = loadJobs();
+    let selectedId = jobs[0]?.id || null;
+
+    const els = {
+      jobList: document.getElementById("jobList"),
+      countToday: document.getElementById("countToday"),
+      countDone: document.getElementById("countDone"),
+      countBad: document.getElementById("countBad"),
+      countDocs: document.getElementById("countDocs"),
+      selectedHint: document.getElementById("selectedHint"),
+      detailStatus: document.getElementById("detailStatus"),
+      shareJobName: document.getElementById("shareJobName"),
+      memberCount: document.getElementById("memberCount"),
+      lineInvite: document.getElementById("lineInvite"),
+      smsInvite: document.getElementById("smsInvite"),
+      copyInvite: document.getElementById("copyInvite"),
+      inviteStatus: document.getElementById("inviteStatus"),
+      memberList: document.getElementById("memberList"),
+      memberName: document.getElementById("memberName"),
+      memberRole: document.getElementById("memberRole"),
+      addMember: document.getElementById("addMember"),
+      jobName: document.getElementById("jobName"),
+      crew: document.getElementById("crew"),
+      schedule: document.getElementById("schedule"),
+      docsChecked: document.getElementById("docsChecked"),
+      previewChecked: document.getElementById("previewChecked"),
+      setGood: document.getElementById("setGood"),
+      setBad: document.getElementById("setBad"),
+      reasonBlock: document.getElementById("reasonBlock"),
+      reasonBase: document.getElementById("reasonBase"),
+      reasonWork: document.getElementById("reasonWork"),
+      memo: document.getElementById("memo"),
+      saveDetail: document.getElementById("saveDetail"),
+      newSchedule: document.getElementById("newSchedule"),
+      changeReason: document.getElementById("changeReason"),
+      addSchedule: document.getElementById("addSchedule"),
+      messages: document.getElementById("messages"),
+      messageText: document.getElementById("messageText"),
+      addMessage: document.getElementById("addMessage"),
+      documentInput: document.getElementById("documentInput"),
+      documentList: document.getElementById("documentList"),
+      photoInput: document.getElementById("photoInput"),
+      photoGrid: document.getElementById("photoGrid"),
+      timeline: document.getElementById("timeline")
+    };
+
+    function loadJobs() {
+      try {
+        const raw = localStorage.getItem(storageKey);
+        return normalizeJobs(raw ? JSON.parse(raw) : defaultJobs);
+      } catch {
+        return normalizeJobs(defaultJobs);
+      }
+    }
+
+    function normalizeJobs(items) {
+      return items.map((job) => ({
+        ...job,
+        messages: (job.messages || []).map((message) => ({
+          ...message,
+          checked: Boolean(message.checked)
+        })),
+        photos: job.photos || [],
+        documents: job.documents || [],
+        members: (job.members || []).map((member) => ({
+          ...member,
+          confirmed: Boolean(member.confirmed)
+        })),
+        changes: job.changes || []
+      }));
+    }
+
+    function saveJobs() {
+      localStorage.setItem(storageKey, JSON.stringify(jobs));
+    }
+
+    function selectedJob() {
+      return jobs.find((job) => job.id === selectedId) || jobs[0];
+    }
+
+    function statusClass(status) {
+      if (status === "完了") return "done";
+      if (status === "不良") return "bad";
+      return "";
+    }
+
+    function render() {
+      const job = selectedJob();
+      els.countToday.textContent = jobs.length;
+      els.countDone.textContent = jobs.filter((item) => item.status === "完了").length;
+      els.countBad.textContent = jobs.filter((item) => item.status === "不良").length;
+      els.countDocs.textContent = jobs.filter((item) => !item.docsChecked || !item.previewChecked).length;
+
+      els.jobList.innerHTML = jobs.map((item) => `
+        <button class="job-card ${item.id === selectedId ? "selected" : ""}" data-job="${item.id}" type="button">
+          <div class="job-head">
+            <div>
+              <p class="job-name">${escapeHtml(item.name)}</p>
+              <p class="job-meta">${escapeHtml(item.schedule)}<br>${escapeHtml(item.address)} / ${escapeHtml(item.crew)}</p>
+            </div>
+            <span class="badge ${statusClass(item.status)}">${escapeHtml(item.status)}</span>
+          </div>
+          <div class="checks">
+            <span class="check-row">資料配布 ${item.docsChecked ? "済み" : "未配布"}</span>
+            <span class="check-row">下見資料 ${item.previewChecked ? "済み" : "未配布"}</span>
+          </div>
+        </button>
+      `).join("");
+
+      els.jobList.querySelectorAll("[data-job]").forEach((button) => {
+        button.addEventListener("click", () => {
+          selectedId = button.dataset.job;
+          render();
+          switchTab("detail");
+        });
+      });
+
+      if (!job) return;
+      els.selectedHint.textContent = job.name;
+      els.detailStatus.textContent = job.status;
+      els.shareJobName.textContent = job.name;
+      const inviteText = buildInviteText(job);
+      els.memberCount.textContent = `${job.members.length}人`;
+      els.lineInvite.href = `https://line.me/R/msg/text/?${encodeURIComponent(inviteText)}`;
+      els.smsInvite.href = `sms:?&body=${encodeURIComponent(inviteText)}`;
+      els.inviteStatus.textContent = "LINE、メッセージ、コピーでこの案件の関係者を招待できます。";
+      els.jobName.value = job.name;
+      els.crew.value = job.crew;
+      els.schedule.value = job.schedule;
+      els.docsChecked.checked = job.docsChecked;
+      els.previewChecked.checked = job.previewChecked;
+      els.memo.value = job.memo;
+      els.setGood.classList.toggle("active", job.status === "完了");
+      els.setBad.classList.toggle("active", job.status === "不良");
+      els.reasonBlock.style.display = job.status === "不良" ? "grid" : "none";
+      els.reasonBase.classList.toggle("active", job.defectReason === "下地問題");
+      els.reasonWork.classList.toggle("active", job.defectReason === "施工問題");
+
+      els.memberList.innerHTML = job.members.length
+        ? job.members.map((member, index) => `
+          <div class="member-item">
+            <div>
+              <strong>${escapeHtml(member.name)}</strong>
+              <span class="member-role">${escapeHtml(member.role)} / ${member.confirmed ? "確認済み" : "未確認"}</span>
+            </div>
+            <label class="member-check">確認 <input data-member-check="${index}" type="checkbox" ${member.confirmed ? "checked" : ""}></label>
+          </div>
+        `).join("")
+        : `<div class="empty">まだメンバーは登録されていません。</div>`;
+
+      els.memberList.querySelectorAll("[data-member-check]").forEach((input) => {
+        input.addEventListener("change", () => {
+          updateSelected((target) => {
+            target.members[Number(input.dataset.memberCheck)].confirmed = input.checked;
+          });
+        });
+      });
+
+      els.messages.innerHTML = job.messages.length
+        ? job.messages.map((item, index) => `
+          <div class="message-item">
+            <div class="message-text">
+              <strong>${escapeHtml(item.at)}</strong>${escapeHtml(item.text)}
+            </div>
+            <label class="message-check">確認 <input data-message-check="${index}" type="checkbox" ${item.checked ? "checked" : ""}></label>
+          </div>
+        `).join("")
+        : `<div class="empty">まだメッセージはありません。</div>`;
+
+      els.messages.querySelectorAll("[data-message-check]").forEach((input) => {
+        input.addEventListener("change", () => {
+          updateSelected((target) => {
+            target.messages[Number(input.dataset.messageCheck)].checked = input.checked;
+          });
+        });
+      });
+
+      els.documentList.innerHTML = job.documents.length
+        ? job.documents.map((item) => `
+          <div class="document-item">
+            <div>
+              <strong>${escapeHtml(item.name)}</strong>
+              ${formatBytes(item.size)}
+            </div>
+            ${item.data ? `<a href="${item.data}" target="_blank" rel="noopener" download="${escapeHtml(item.name)}">開く</a>` : `<span class="badge">見本</span>`}
+          </div>
+        `).join("")
+        : `<div class="empty">まだPDF資料はありません。</div>`;
+
+      els.photoGrid.innerHTML = job.photos.length
+        ? job.photos.map((src) => `<img src="${src}" alt="施工写真">`).join("")
+        : `<div class="empty" style="grid-column: 1 / -1;">まだ写真はありません。</div>`;
+
+      els.timeline.innerHTML = job.changes.length
+        ? job.changes.map((item) => `<div class="log-item"><strong>${escapeHtml(item.at)} / ${escapeHtml(item.schedule)}</strong>${escapeHtml(item.reason)}</div>`).join("")
+        : `<div class="empty">スケジュール変更はありません。</div>`;
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll(".screen").forEach((screen) => screen.classList.remove("active"));
+      document.getElementById(`screen-${tab}`).classList.add("active");
+      document.querySelectorAll(".bottom-nav button").forEach((button) => {
+        button.classList.toggle("active", button.dataset.tab === tab);
+      });
+    }
+
+    function updateSelected(mutator) {
+      const job = selectedJob();
+      if (!job) return;
+      mutator(job);
+      saveJobs();
+      render();
+    }
+
+    function currentTime() {
+      return new Date().toLocaleTimeString("ja-JP", { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function formatBytes(value) {
+      if (!value) return "資料リンク";
+      if (value < 1024 * 1024) return `${Math.round(value / 1024)} KB`;
+      return `${(value / 1024 / 1024).toFixed(1)} MB`;
+    }
+
+    function buildInviteText(job) {
+      return [
+        "キッチン施工管理アプリへの招待です。",
+        `案件: ${job.name}`,
+        `予定: ${job.schedule}`,
+        `現場: ${job.address}`,
+        `アプリ: ${location.href}`,
+        "参加後、共有タブでメンバー確認をお願いします。"
+      ].join("\n");
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    document.querySelectorAll(".bottom-nav button").forEach((button) => {
+      button.addEventListener("click", () => switchTab(button.dataset.tab));
+    });
+
+    els.setGood.addEventListener("click", () => {
+      updateSelected((job) => {
+        job.status = "完了";
+        job.defectReason = "";
+      });
+    });
+
+    els.setBad.addEventListener("click", () => {
+      updateSelected((job) => {
+        job.status = "不良";
+        job.defectReason = job.defectReason || "下地問題";
+      });
+    });
+
+    els.reasonBase.addEventListener("click", () => {
+      updateSelected((job) => {
+        job.status = "不良";
+        job.defectReason = "下地問題";
+      });
+    });
+
+    els.reasonWork.addEventListener("click", () => {
+      updateSelected((job) => {
+        job.status = "不良";
+        job.defectReason = "施工問題";
+      });
+    });
+
+    els.saveDetail.addEventListener("click", () => {
+      updateSelected((job) => {
+        job.name = els.jobName.value.trim() || job.name;
+        job.crew = els.crew.value.trim();
+        job.schedule = els.schedule.value.trim();
+        job.docsChecked = els.docsChecked.checked;
+        job.previewChecked = els.previewChecked.checked;
+        job.memo = els.memo.value.trim();
+      });
+    });
+
+    els.addSchedule.addEventListener("click", () => {
+      const schedule = els.newSchedule.value.trim();
+      const reason = els.changeReason.value.trim();
+      if (!schedule || !reason) return;
+      updateSelected((job) => {
+        job.schedule = schedule;
+        job.changes.unshift({ at: currentTime(), schedule, reason });
+      });
+      els.newSchedule.value = "";
+      els.changeReason.value = "";
+      switchTab("share");
+    });
+
+    els.addMember.addEventListener("click", () => {
+      const name = els.memberName.value.trim();
+      if (!name) return;
+      updateSelected((job) => {
+        job.members.push({
+          name,
+          role: els.memberRole.value,
+          confirmed: false
+        });
+      });
+      els.memberName.value = "";
+    });
+
+    els.copyInvite.addEventListener("click", async () => {
+      const job = selectedJob();
+      if (!job) return;
+      const text = buildInviteText(job);
+      try {
+        await navigator.clipboard.writeText(text);
+        els.inviteStatus.textContent = "招待文をコピーしました。LINEやメッセージに貼り付けできます。";
+      } catch {
+        els.inviteStatus.textContent = text;
+      }
+    });
+
+    els.addMessage.addEventListener("click", () => {
+      const text = els.messageText.value.trim();
+      if (!text) return;
+      updateSelected((job) => {
+        job.messages.unshift({ at: currentTime(), text, checked: false });
+      });
+      els.messageText.value = "";
+    });
+
+    els.documentInput.addEventListener("change", () => {
+      const file = els.documentInput.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        updateSelected((job) => {
+          job.documents.unshift({
+            name: file.name,
+            size: file.size,
+            data: reader.result
+          });
+        });
+        els.documentInput.value = "";
+      };
+      reader.readAsDataURL(file);
+    });
+
+    els.photoInput.addEventListener("change", () => {
+      const file = els.photoInput.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        updateSelected((job) => {
+          job.photos.unshift(reader.result);
+        });
+        els.photoInput.value = "";
+      };
+      reader.readAsDataURL(file);
+    });
+
+    render();
+  </script>
+</body>
+</html>
